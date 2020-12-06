@@ -35,18 +35,16 @@ get_package_imports <- function(filename) {
 #' @export
 unused_import_linter <- function(except_packages = "tidyverse") {
   function(source_file) {
-    x <- global_xml_parsed_content(source_file)
-    if (is.null(x)) {
-      return()
-    }
-    import_exprs <- get_import_exprs(x)
+    if (is.null(source_file$full_xml_parsed_content)) return(list())
+
+    import_exprs <- get_import_exprs(source_file$full_xml_parsed_content)
     if (length(import_exprs) == 0) {
       return()
     }
     pkg_exprs <- xml2::xml_find_first(import_exprs, "./expr[STR_CONST|SYMBOL]")
     import_pkgs <- strip_names(as.character(xml2::xml_find_first(pkg_exprs, "./*/node()")))
 
-    function_calls <- get_function_calls(x)
+    function_calls <- get_function_calls(source_file$full_xml_parsed_content)
 
     lapply(
       seq_along(import_pkgs),
@@ -67,12 +65,13 @@ unused_import_linter <- function(except_packages = "tidyverse") {
             line_number = line_num,
             column_number = pkg_expr@col1,
             type = "warning",
-            message = "import is never used",
+            message = paste0("package ", pkg, " is never used."),
             line = source_file[["file_lines"]][[as.numeric(line_num)]],
             ranges = list(as.numeric(c(import_expr@col1, import_expr@col2))),
             linter = "unused_import_linter"
           )
         }
-      })
+      }
+    )
   }
 }
