@@ -145,6 +145,8 @@ unused_import_linter(source_file)
 \arguments{
 \item{source_file}{returned by \code{\link{get_source_expressions}}}
 
+\item{r_version}{Minimum R version to test for compatibility}
+
 \item{allow_single_line}{if true allow a open and closed curly pair on the
 same line.}
 
