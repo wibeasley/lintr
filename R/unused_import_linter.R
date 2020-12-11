@@ -1,34 +1,9 @@
 get_function_calls <- function(x) {
-  as.character(xml2::xml_find_all(x, "//SYMBOL_FUNCTION_CALL/text()"))
+  xml2::xml_text(xml2::xml_find_all(x, "//SYMBOL_FUNCTION_CALL/text()"))
 }
 
 get_import_exprs <- function(x) {
   xml2::xml_find_all(x, "//expr[expr[SYMBOL_FUNCTION_CALL[text() = 'library' or text() = 'require']]]")
-}
-
-get_package_imports <- function(filename) {
-  pkg <- find_package(path = filename)
-  if (is.null(pkg) || !file.exists(file.path(pkg, "NAMESPACE"))) return(character())
-
-  ns <- readLines(file.path(pkg, "NAMESPACE"))
-
-  # Extract package names from import(pkg) and importFrom(pkg,fun)
-  # From https://cran.r-project.org/doc/manuals/r-devel/R-exts.html#Creating-R-packages, Section 1.1.1:
-  # The mandatory ‘Package’ field gives the name of the package.
-  # This should contain only (ASCII) letters, numbers and dot, have at least two characters and
-  # start with a letter and not end in a dot.
-  pkgname_regex <- rex::rex(
-    letter, any_of(alnum, "."), alnum
-  )
-  imports <- rex::re_matches(
-    ns,
-    rex::rex(
-      start, "import", maybe("From"), "(",
-      capture(name = "package", pkgname_regex)
-    )
-  )[, "package"]
-
-  unique(imports[!is.na(imports)])
 }
 
 #' @describeIn linters checks that libraries imported are actually used.
