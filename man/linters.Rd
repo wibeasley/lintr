@@ -140,7 +140,7 @@ undesirable_operator_linter(op = default_undesirable_operators)
 
 unneeded_concatenation_linter(source_file)
 
-unused_import_linter(source_file)
+unused_import_linter(except_packages = "tidyverse")
 }
 \arguments{
 \item{source_file}{returned by \code{\link{get_source_expressions}}}
